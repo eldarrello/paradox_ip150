@@ -29,9 +29,22 @@
 		C9CF35E52EBD08EF00AD9244 /* ParadoxUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ParadoxUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C9972A5F2ED3499C00F01E83 /* Exceptions for "Paradox" folder in "Paradox" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C9CF35CD2EBD08ED00AD9244 /* Paradox */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		C9CF35D02EBD08ED00AD9244 /* Paradox */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C9972A5F2ED3499C00F01E83 /* Exceptions for "Paradox" folder in "Paradox" target */,
+			);
 			path = Paradox;
 			sourceTree = "<group>";
 		};
@@ -380,6 +393,7 @@
 				DEVELOPMENT_TEAM = 24X99XDJTH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Paradox/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -412,6 +426,7 @@
 				DEVELOPMENT_TEAM = 24X99XDJTH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Paradox/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

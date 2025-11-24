@@ -23,7 +23,13 @@ class SettingsManager: ObservableObject {
     }
     
     var baseURL: String {
-        return "http://\(ipAddress)"
+        // Check if the input already has a protocol
+        if ipAddress.lowercased().hasPrefix("http://") || ipAddress.lowercased().hasPrefix("https://") {
+            return ipAddress
+        } else {
+            // Default to http if no protocol specified
+            return "http://\(ipAddress)"
+        }
     }
     
     var hasValidSettings: Bool {

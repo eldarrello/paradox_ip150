@@ -98,11 +98,31 @@ class ParadoxService: ObservableObject {
     
     // MARK: - Session Management
     
+    private func constructURL(path: String, baseURL: String) -> URL? {
+        // If baseURL already has http://, use it as is, otherwise prepend http://
+        let fullBaseURL: String
+        if baseURL.lowercased().hasPrefix("http://") || baseURL.lowercased().hasPrefix("https://") {
+            fullBaseURL = baseURL
+        } else {
+            fullBaseURL = "http://\(baseURL)"
+        }
+        
+        // Ensure there's exactly one slash between baseURL and path
+        let separator = fullBaseURL.hasSuffix("/") ? "" : "/"
+        let fullURLString = "\(fullBaseURL)\(separator)\(path)"
+        
+        return URL(string: fullURLString)
+    }
+    
+    // MARK: - Session Management
+    
     func getSessionID(baseURL: String, completion: @escaping (String?) -> Void) {
-        guard let url = URL(string: "\(baseURL)/login_page.html") else {
+        guard let url = constructURL(path: "login_page.html", baseURL: baseURL) else {
             completion(nil)
             return
         }
+        
+        print("Fetching session ID from: \(url.absoluteString)")
         
         let task = URLSession.shared.dataTask(with: url) { data, response, error in
             if let error = error {
@@ -121,6 +141,8 @@ class ParadoxService: ObservableObject {
                 completion(nil)
                 return
             }
+            
+            print("Session ID response status: \(httpResponse.statusCode)")
             
             guard httpResponse.statusCode == 200, let data = data, let htmlString = String(data: data, encoding: .utf8) else {
                 DispatchQueue.main.async {
@@ -178,9 +200,10 @@ class ParadoxService: ObservableObject {
             self.baseURL = baseURL
             
             let (uValue, pValue) = self.loginEncrypt(username: username, password: password, sessionID: sessionID)
-            let authURL = "\(baseURL)/default.html?u=\(uValue)&p=\(pValue)"
             
-            guard let url = URL(string: authURL) else {
+            // Construct the authentication URL
+            let authPath = "default.html?u=\(uValue)&p=\(pValue)"
+            guard let authURL = self.constructURL(path: authPath, baseURL: baseURL) else {
                 DispatchQueue.main.async {
                     self.isLoading = false
                     completion(false)
@@ -188,7 +211,9 @@ class ParadoxService: ObservableObject {
                 return
             }
             
-            let task = URLSession.shared.dataTask(with: url) { data, response, error in
+            print("Authenticating with URL: \(authURL.absoluteString)")
+            
+            let task = URLSession.shared.dataTask(with: authURL) { data, response, error in
                 DispatchQueue.main.async {
                     self.isLoading = false
                     
@@ -198,6 +223,14 @@ class ParadoxService: ObservableObject {
                         completion(false)
                         return
                     }
+                    
+                    guard let httpResponse = response as? HTTPURLResponse else {
+                        self.lastError = "Invalid response from server"
+                        completion(false)
+                        return
+                    }
+                    
+                    print("Authentication response status: \(httpResponse.statusCode)")
                     
                     guard let data = data, let responseString = String(data: data, encoding: .utf8) else {
                         self.lastError = "No response data received"
@@ -236,7 +269,7 @@ class ParadoxService: ObservableObject {
             return 
         }
         
-        guard let url = URL(string: "\(baseURL)/logout.html") else {
+        guard let url = constructURL(path: "logout.html", baseURL: baseURL) else {
             self.isConnected = false
             return
         }
@@ -265,12 +298,12 @@ class ParadoxService: ObservableObject {
     func getStatus(area: String = "", value: String = "") {
         guard isConnected else { return }
         
-        var statusURL = "\(baseURL)/statuslive.html"
+        var statusPath = "statuslive.html"
         if !area.isEmpty {
-            statusURL += "?area=\(area)&value=\(value)"
+            statusPath += "?area=\(area)&value=\(value)"
         }
         
-        guard let url = URL(string: statusURL) else { return }
+        guard let url = constructURL(path: statusPath, baseURL: baseURL) else { return }
         
         let task = URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
             guard let self = self else { return }
@@ -311,7 +344,7 @@ class ParadoxService: ObservableObject {
         }
         task.resume()
     }
-    
+
     func arm() {
         getStatus(area: "00", value: "r")
     }

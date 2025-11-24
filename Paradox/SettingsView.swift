@@ -21,7 +21,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Connection Settings")) {
+                Section(header: Text("Connection Settings"), footer: Text("Examples: 192.168.1.100, or http://mydomain.com:8080")) {
                     TextField("Username", text: $username)
                         .textContentType(.username)
                         .autocapitalization(.none)
@@ -32,9 +32,9 @@ struct SettingsView: View {
                         .autocapitalization(.none)
                         .disableAutocorrection(true)
                     
-                    TextField("IP Address", text: $ipAddress)
+                    TextField("IP Address or Domain", text: $ipAddress)
                         .textContentType(.URL)
-                        .keyboardType(.numbersAndPunctuation)
+                        .keyboardType(.URL)
                         .autocapitalization(.none)
                         .disableAutocorrection(true)
                 }
@@ -58,7 +58,7 @@ struct SettingsView: View {
                     }
                 }
                 
-                Section {
+                Section(footer: Text("App will automatically connect using these settings when opened.")) {
                     Button("Save Settings") {
                         saveSettings()
                     }
@@ -89,9 +89,17 @@ struct SettingsView: View {
         isTestingConnection = true
         testResult = nil
         
-        paradoxService.connect(username: username, password: password, baseURL: "http://\(ipAddress)") { success in
+        // Construct base URL for testing
+        let testBaseURL: String
+        if ipAddress.lowercased().hasPrefix("http://") || ipAddress.lowercased().hasPrefix("https://") {
+            testBaseURL = ipAddress
+        } else {
+            testBaseURL = "http://\(ipAddress)"
+        }
+        
+        paradoxService.connect(username: username, password: password, baseURL: testBaseURL) { success in
             isTestingConnection = false
-            testResult = success ? "Success: Connected to alarm system" : "Failed: Could not connect"
+            testResult = success ? "Success: Connected to alarm system" : "Failed: Could not connect to \(testBaseURL)"
             
             // Disconnect after test
             if success {
